@@ -2,6 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { IonSlides, NavController } from '@ionic/angular';
 import { UsuarioService } from '../../services/usuario.service';
+import { UIServiceService } from '../../services/uiservice.service';
+import { Usuario } from '../../interfaces/interfaces';
 
 @Component({
   selector: 'app-login',
@@ -54,10 +56,18 @@ export class LoginPage implements OnInit {
   loginUser = {
     email: 'test1@test.com',
     password: '123456'
-  }
+  };
+
+  registroUsuario: Usuario = {
+    email: 'test',
+    password: '123456',
+    nombre: 'Test',
+    avatar: 'av-1.png'
+  };
 
   constructor(private usuarioService: UsuarioService,
-              private navCtrl: NavController ) { }
+              private navCtrl: NavController,
+              private uiService: UIServiceService ) { }
 
   ngOnInit() {
     this.slides.lockSwipes( true );
@@ -72,12 +82,21 @@ export class LoginPage implements OnInit {
     if ( valido ) {
       this.navCtrl.navigateRoot( '/main/tabs/tab1', { animated: true } );
     } else {
-      //mostrar alerta de usuario y pass
+      this.uiService.alertaInformativa('Usuario / contraseña invalidos');
     }
   }
 
-  registro( fRegistro: NgForm ) {
-    console.log(fRegistro.valid);
+  async registro( fRegistro: NgForm ) {
+    if ( fRegistro.invalid ) {
+      return;
+    }
+    const valido = await this.usuarioService.registro( this.registroUsuario );
+
+    if ( valido ) {
+      this.navCtrl.navigateRoot( '/main/tabs/tab1', { animated: true } );
+    } else {
+      this.uiService.alertaInformativa('El correo electronico ya esta registrado');
+    }
   }
 
   seleccionarAvatar( avatar ) {

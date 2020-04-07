@@ -68,18 +68,21 @@
                             <ion-label>Email</ion-label>
                             <ion-input name="email" 
                                         type="email"
+                                        [(ngModel)]="registroUsuario.email"
                                         required></ion-input>
                             </ion-item>
                             <ion-item>
                             <ion-label>Nombre</ion-label>
                             <ion-input name="nombre"
                                         type="text"
+                                        [(ngModel)]="registroUsuario.nombre"
                                         required></ion-input>
                             </ion-item>
                             <ion-item>
                             <ion-label>Password</ion-label>
                             <ion-input name="password"
                                         type="password"
+                                        [(ngModel)]="registroUsuario.password"
                                         required></ion-input>
                             </ion-item>
                         </ion-list>
