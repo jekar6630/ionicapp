@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
 import { environment } from 'src/environments/environment';
 import { Usuario } from '../interfaces/interfaces';
+import { NavController } from '@ionic/angular';
 
 const URL = environment.url;
 
@@ -12,8 +13,10 @@ const URL = environment.url;
 export class UsuarioService {
 
   token: string = null;
+  private usuario: Usuario = {};
   constructor( private http: HttpClient,
-               private storage: Storage) { }
+               private storage: Storage,
+               private navCtrl: NavController) { }
 
   login(email, password) {
     const data = { email, password };
@@ -55,4 +58,61 @@ export class UsuarioService {
       });
     });
   }
+
+  async cargarToken() {
+      this.token = await this.storage.get('token') || null;
+  }
+
+  async validaToken(): Promise<boolean> {
+
+    await this.cargarToken();
+
+    if ( !this.token ) {
+      this.navCtrl.navigateRoot('/login');
+      return Promise.resolve(false);
+    }
+
+    return new Promise<boolean>(resolve => {
+      const headers = new HttpHeaders({
+        'x-token': this.token
+      });
+      this.http.get(`${ URL }/user/`, { headers }).subscribe( resp => {
+        if( resp['ok'] ) {
+          this.usuario = resp['usuario'];
+          resolve(true);
+        } else {
+          this.navCtrl.navigateRoot('/login');
+          resolve(false);
+        }
+      });
+    });
+  }
+
+  getUsuario() {
+
+    if ( !this.usuario._id ) {
+      this.validaToken();
+    }
+
+    return { ...this.usuario };
+  }
+
+  actualizarUsuario( usuario: Usuario) {
+    const headers = new HttpHeaders({
+      'x-token': this.token
+    });
+
+    return new Promise( resolve => {
+      this.http.post(`${ URL }/user/update`, usuario, { headers }).subscribe( resp => {
+        console.log(resp);
+        if ( resp['ok'] ) {
+          this.guardarToken( resp['token'] );
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      });
+    });
+  }
+
 }
