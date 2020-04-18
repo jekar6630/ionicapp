@@ -98,6 +98,7 @@ export class UsuarioService {
   }
 
   actualizarUsuario( usuario: Usuario) {
+    console.log('Actualizar usuario: ' + usuario.avatar);
     const headers = new HttpHeaders({
       'x-token': this.token
     });
